@@ -2,17 +2,18 @@
 {
     using System;
     using System.Linq;
+    using System.Text;
     using Humanizer;
 
     public class SimpleRegistry : ICitizenRegistry
     {
+        private readonly DateTime thenEverythingsBegun = new DateTime(1899, 12, 31);
+
         private ICitizen[] citizens = new ICitizen[20];
 
         private int[] genderCounts = new int[2];
 
         private DateTime? lastRegistrationDateTime;
-
-        private int counterForAddNewCitizen = 0;
 
         public ICitizen this[string id]
         {
@@ -81,26 +82,20 @@
 
         private void DoubleCitizens()
         {
-            var newCitizens = new ICitizen[this.citizens.Length + 20];
-            for (int i = 0; i < this.citizens.Length; i++)
-            {
-                newCitizens[i] = this.citizens[i];
-            }
-
-            this.counterForAddNewCitizen += 20;
+            Array.Resize(ref this.citizens, this.citizens.Length + 20);
         }
 
         private string CreateId(ICitizen citizen)
         {
-            var id = string.Empty;
+            var id = new StringBuilder(10);
 
-            id += new string(Convert.ToString((citizen.BirthDate - new DateTime(1899, 12, 31)).Days + 100000).ToArray(), 1, 5);
+            id.Append(string.Format("{0:00000}", (citizen.BirthDate - this.thenEverythingsBegun).Days));
 
-            var count = this.citizens.Count(cit => cit?.Gender == citizen.Gender) + 1;
+            var count = this.citizens.Where(cit => cit != null).Count(cit => (cit.Gender == citizen.Gender) && (Convert.ToString(cit.VatId.Take(5)) == Convert.ToString(id.ToString().Take(5)))) + 1;
 
-            id += new string(Convert.ToString(((count - 1 + (int)citizen.Gender) * 2) - (int)citizen.Gender + 10000).Reverse().Take(4).Reverse().ToArray());
+            id.Append(new string(Convert.ToString(((count - 1 + (int)citizen.Gender) * 2) - (int)citizen.Gender + 10000).Reverse().Take(4).Reverse().ToArray()));
 
-            id += Convert.ToString((-Convert.ToInt32(id[0])
+            id.Append(Convert.ToString((-Convert.ToInt32(id[0])
                 + (Convert.ToInt32(id[1]) * 5)
                 + (Convert.ToInt32(id[2]) * 7)
                 + (Convert.ToInt32(id[3]) * 9)
@@ -108,9 +103,9 @@
                 + (Convert.ToInt32(id[5]) * 6)
                 + (Convert.ToInt32(id[6]) * 10)
                 + (Convert.ToInt32(id[7]) * 5)
-                + ((Convert.ToInt32(id[8]) * 7) % 11)) % 10);
+                + ((Convert.ToInt32(id[8]) * 7) % 11)) % 10));
 
-            return id;
+            return id.ToString();
         }
     }
 }

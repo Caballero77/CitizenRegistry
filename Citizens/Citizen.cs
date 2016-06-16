@@ -6,56 +6,67 @@ using System.Threading.Tasks;
 
 namespace Citizens
 {
-    public class Citizen:ICitizen
+    public class Citizen : ICitizen
     {
-        private string vatId = String.Empty;
+        private string vatId = string.Empty;
 
         private string firstName;
+
+        private DateTime dateOfBirth;
+
+        private string lastName;
+
+        private Gender gender;
+
+        public Citizen(string firstName, string lastName, DateTime dateOfBirth, Gender gender)
+        {
+            this.FirstName = firstName;
+            this.LastName = lastName;
+            this.BirthDate = dateOfBirth;
+            this.Gender = gender;
+        }
 
         public string FirstName
         {
             get
             {
-                return firstName;
+                return this.firstName;
             }
+
             set
             {
-                firstName = (Char.ToUpper(value[0]) + new string(value.ToLower().Reverse().Take(value.Length - 1).Reverse().ToArray()));
+                this.firstName = char.ToUpper(value[0]) + new string(value.ToLower().Skip(1).ToArray());
             }
         }
-
-        private string lastName;
 
         public string LastName
         {
             get
             {
-                return lastName;
+                return this.lastName;
             }
+
             set
             {
-                lastName = (Char.ToUpper(value[0]) + new string(value.ToLower().Reverse().Take(value.Length - 1).Reverse().ToArray()));
+                this.lastName = char.ToUpper(value[0]) + new string(value.ToLower().Skip(1).ToArray());
             }
         }
-
-        private DateTime dateOfBirth;
-
-        private Gender gender;
 
         public DateTime BirthDate
         {
             get
             {
-                return dateOfBirth;
+                return this.dateOfBirth;
             }
+
             private set
             {
-                if(value > SystemDateTime.Now())
+                if (value > SystemDateTime.Now())
                 {
                     throw new ArgumentException("Are you shore about birth date? I don`t think so.");
                 }
-                dateOfBirth = value.Date;
 
+                this.dateOfBirth = value.Date;
             }
         }
 
@@ -63,26 +74,20 @@ namespace Citizens
         {
             get
             {
-                return gender;
+                return this.gender;
             }
+
             private set
             {
-                if(((Int32)value >= 2) || ((Int32)value < 0))
+                if (!Enum.IsDefined(typeof(Gender), value))
                 {
                     throw new ArgumentOutOfRangeException("Invalid gender");
                 }
-                gender = value;
+
+                this.gender = value;
             }
         }
 
         public string VatId { get; set; }
-
-        public Citizen(string firstName, string lastName, DateTime dateOfBirth, Gender gender)
-        {
-            FirstName = firstName;
-            LastName = lastName;
-            BirthDate = dateOfBirth;
-            Gender = gender;
-        }
     }
 }
